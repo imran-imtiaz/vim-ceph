@@ -1,0 +1,157 @@
+*vim-ceph* A vim plugin for ceph development
+Description:  A vim plugin for ceph development
+Maintainer:   Imran Imtiaz <imran.imtiaz@uk.ibm.com
+Plugin URL:   https://github.com/imran-imtiaz/vim-ceph
+
+==============================================================================
+INTRODUCTION                                             *ceph-introduction*
+
+A vim plugin for ceph container based development.
+
+------------------------------------------------------------------------------
+PRE-REQ                                                  *ceph-prereq*
+
+This plugin will work without any external dependencies, however, for the enhanced
+user experience, please install vim-dispatch (https://github.com/tpope/vim-dispatch) 
+which enables asynchronous execution of commands and vim compiler plugin that allows
+mapping of remote compilation errors to the local workspace.
+
+The plugin assumes that there's a passwordless configuration setup between your
+local machine and the ceph build container.
+
+It's recommended that short names are configured in your local ~/.ssh/config file
+for the remote ceph container (e.g. ceph instead of ceph.example.com), also it's 
+a requirement that the local can do passwordless to github.com and the ceph container.
+
+------------------------------------------------------------------------------
+GOAL                                                     *ceph-goal*
+
+The main goal of this plugin is to provide a way to compile the ceph code
+without having to exit vim.
+
+------------------------------------------------------------------------------
+OPTIONS                                                  *ceph-options*
+
+Following options are mandatory and must be set before any of the commands that
+this plugin provides are used:
+
+    let g:ceph_remote_server = "ceph"
+    Specify the ceph container host name.
+
+    let g:ceph_local_workdir = "/User/<home>/Development/ceph-git"
+    Specify the local workspace directory where to initialise a local copy of 
+    the repo.
+
+    let g:ceph_remote_workdir = "/"
+    Specify the build directory on the container where to link your local repo.
+
+    let g:ceph_checkout_dir = "ceph"
+    Specify the name of the directory that will be created inside the local/remote
+    workspace directory where the code will be checked out. 
+    Default is "ceph"
+
+    let g:ceph_github_server = "git@github.com"
+    Specify the name of the git server, default is git@github.com
+
+    let g:ceph_github_repo = "git@github.com"
+    Specify the name of the github repo, default is ceph/ceph.git
+
+    let g:ceph_branch = "main"
+    Specify the branch name to checkout.
+
+Set these options in your ~/.vimrc, so they are loaded each time vim is
+restarted.
+
+------------------------------------------------------------------------------
+COMMANDS                                                 *ceph-commands*
+
+The plugin adds the following vim commands:
+
+    :CephInit
+    Initialise a remote and local workspace. Depending on the size of the repo
+    this could take a while hence you can init local and remote repos
+    independently by using the following :CephLocal and :CephRemote commands.
+    The command will serialize the execution, first the local repo will be set
+    up and then the local repo will be push in to the remote repo.
+
+    :CephInitLocal
+    Initialise a local workspace. This will checkout the ceph branch into your
+    local workdir (g:ceph_local_workdir), it will create a new directory
+    (g:ceph_checkout_dir) where the files will be checked out. This will also
+    add a git remote for linking with the remote ceph container instance.
+
+    :CephInitRemote
+    Initialise a remote workspace. This will checkout the ceph branch into your
+    remote workdir (g:ceph_remote_workdir).
+
+    :CephBuild
+    Build the ceph source code on the remote ceph container. This will push your
+    local commit on the remote server (g:ceph_remote_server) into the repo
+    that is linked with your local workspace. If your current vim directory is
+    set to the checkout directory (i.e. g:ceph_local_workdir + g:ceph_checkout_dir) 
+    then you will be able to load compilation errors locally. This command will
+    also synchronise the local ./build directory with the remote, and modify the
+    compile_commands.json file copied from the remote server for semantic completion
+    in vim if you have YCM plugin (https://github.com/ycm-core/YouCompleteMe) installed.
+
+    :CephVstart
+    This will run the vstart.sh script with default options inside the ceph container.
+
+    :CephCleanRemote
+    Clean the remote build directory. This command will reset the head on the
+    remote build container, effectively doing a deepclean.
+
+
+Note: In order to load the remote compilation errors correctly, make sure that
+after having initialized the local repository, you do a vim 'cd' into the
+checked out directory in order to get the mapping for the remote errors.
+
+------------------------------------------------------------------------------
+SYNTAX                                                   *ceph-syntax*
+
+The plugin adds syntax highlighting for some ceph specific keywords e.g. 
+
+>
+
+TODO
+
+<
+
+------------------------------------------------------------------------------
+MAPPINGS                                                 *ceph-mappings*
+
+The plugin does not come with any default key mappings, however, you can create
+your own mappings to your liking.
+
+Following are examples of some of the useful mappings you can configure:
+
+>
+
+nnoremap <leader>ci  :CephInit<CR>
+nnoremap <leader>cil :CephInitLocal<CR>
+nnoremap <leader>cir :CephInitRemote<CR>
+nnoremap <leader>cb  :CephBuild<CR>
+nnoremap <leader>cr  :CephVstart<CR>
+nnoremap <leader>cc  :CephCleanRemote<CR>
+
+<
+
+------------------------------------------------------------------------------
+RECOMMENDATION                                           *ceph-recommendation*
+
+It's recommended that you install vim-fugitive plugin
+(https://github.com/tpope/vim-fugitive). The vim-fugitive plugin isn't required
+for this plugin but will make your vim experience much better.
+
+------------------------------------------------------------------------------
+Future                                                   *ceph-future*
+
+The following features are desirable, so if you feel like it then go ahead and
+submit your patch:
+
+- <add-here>
+
+==============================================================================
+CHANGELOG                                                *ceph-changelog*
+
+- (v: 1.0) Initial version
