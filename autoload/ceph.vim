@@ -125,7 +125,7 @@ endfunction
 
 function! ceph#init() abort
     if !ceph#repo_exists(g:ceph_local_workspace, v:false) && ceph#passwordless_setup_exists()
-        echo "Initialise a new workspace in" . g:ceph_local_workspace . " (y/n)"
+        echo "Initialise a new workspace in " . g:ceph_local_workspace . " (y/n)"
         let confirm = nr2char(getchar())
         if confirm ==? 'y'
             call ceph#dispatch_local(ceph#get_init_command("full"))
@@ -220,15 +220,15 @@ function! ceph#commit() abort
 endfunction
 
 function! ceph#get_remote_build_command()
-    return 'cd ' . g:ceph_remote_workspace. ' && ' .
+    return 'cd ' . g:ceph_remote_workspace . ' && ' .
                 \ 'git checkout ' . s:commit_hash . ' && ' .
-                \ './do_cmake.sh || true' . ' && ' .
+                \ 'CMAKE_EXPORT_COMPILE_COMMANDS=ON ./do_cmake.sh || true' . ' && ' .
                 \ 'cd build' . ' && ' .
                 \ 'ninja -l40 -j20'
 endfunction
 
 function! ceph#get_clean_remote_command()
-    return 'cd ' . g:ceph_remote_workspace. ' && ' .
+    return 'cd ' . g:ceph_remote_workspace . ' && ' .
                 \ 'git clean -qfdx && ' .
                 \ 'git reset --hard HEAD && ' .
                 \ 'git fetch && ' .
@@ -249,7 +249,13 @@ function! ceph#get_remote_git_init_command()
 endfunction
 
 function! ceph#get_rsync_command()
-    let filter_pattern = " --include '*/' --include '*.[h|hpp|c|cc|json]' --exclude '*' "
+    let filter_pattern = "--include '*/'" .
+                \ "--include '*.h' " . 
+                \ "--include '*.hpp' " . 
+                \ "--include '*.c' " . 
+                \ "--include '*.cc' " . 
+                \ "--include '*.json' " . 
+                \ "--exclude '*' "
     return 'rsync -v --copy-links -aK -e "ssh -T" ' . filter_pattern .
                 \ g:ceph_remote_server . ':' . g:ceph_remote_workspace . '/build ' . g:ceph_local_workspace
 endfunction
