@@ -1,6 +1,8 @@
 let s:save_cpo = &cpo
 set cpo&vim
 let s:commit_hash = 0
+let s:compile_commands = g:ceph_local_workspace . '/build/compile_commands.json'
+let s:compile_commands_link = g:ceph_local_workspace . '/compile_commands.json'
 
 function! ceph#run_local(cmd, ...) abort
     let use_dispatch = a:0 > 0 ? a:1 : 0
@@ -155,8 +157,13 @@ function! ceph#clean_remote() abort
     endif
 endfunction
 
+function! ceph#test()
+    echo ceph#get_file_chksum(s:compile_commands)
+endfunction
+
 function! ceph#build() abort
     if ceph#git_remote_exists(g:ceph_remote_server)
+        call ceph#update_compile_commands()
         " commit and update the hash
         call ceph#commit()
         let cmd = 'cd ' . g:ceph_local_workspace . ' && ' .
@@ -212,7 +219,7 @@ function! ceph#commit() abort
     endif
     if s:shell_error != 0
         throw "Commit failed"
-    else 
+    else
         let s:commit_hash = trim(ceph#run_local('git log -1 --pretty=%H'))
         call ceph#run_local('git reset --soft HEAD^')
     endif
@@ -249,15 +256,61 @@ function! ceph#get_remote_git_init_command()
 endfunction
 
 function! ceph#get_rsync_command()
-    let filter_pattern = "--include '*/'" .
-                \ "--include '*.h' " . 
-                \ "--include '*.hpp' " . 
-                \ "--include '*.c' " . 
-                \ "--include '*.cc' " . 
-                \ "--include '*.json' " . 
+    let filter_pattern = "--include '*/' " .
+                \ "--include '*.h' " .
+                \ "--include '*.hpp' " .
+                \ "--include '*.c' " .
+                \ "--include '*.cc' " .
+                \ "--include '*.json' " .
                 \ "--exclude '*' "
     return 'rsync -v --copy-links -aK -e "ssh -T" ' . filter_pattern .
                 \ g:ceph_remote_server . ':' . g:ceph_remote_workspace . '/build ' . g:ceph_local_workspace
+endfunction
+
+function! ceph#update_compile_commands()
+    if filereadable(s:compile_commands)
+        call ceph#run_local(ceph#get_compile_commands_awk_command())
+    endif
+endfunction
+
+function! ceph#get_compile_commands_awk_command()
+    let awk_begin =<< trim eval END
+    lws = "{g:ceph_local_workspace}"
+    rws = "{g:ceph_remote_workspace}"
+    gcc = "\"{trim(system('which gcc'))}"
+    cpp = "\"{trim(system('which g++'))}"
+    END
+    let awk_cmd =<< trim END
+awk '
+    BEGIN {
+    %s
+    }
+
+    $1 ~ /directory/ {
+        gsub(rws, lws)
+    }
+
+    $1 ~ /command/ {
+        sub("-D__linux__ ", "")
+        sub("-D__CEPH__", "")
+        gsub(rws, lws)
+        if ($2 ~ /gcc/) $2 = gcc
+        if ($2 ~ /g\+\+/) $2 = cpp
+    }
+
+    $1 ~ /file/ {
+        gsub(rws, lws)
+    }
+
+    { print $0 }
+' %s
+    END
+    let pipeline =<< trim eval END
+    {s:compile_commands} > {s:compile_commands}.updated;
+    ln -s {s:compile_commands}.updated {s:compile_commands_link} 2>&1 >/dev/null;
+    END
+
+    return printf(join(awk_cmd, "\n"), join(awk_begin, "\n"), join(pipeline))
 endfunction
 
 let &cpo = s:save_cpo

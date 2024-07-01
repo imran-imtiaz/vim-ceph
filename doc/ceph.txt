@@ -88,7 +88,7 @@ The plugin adds the following vim commands:
     Build the ceph source code on the remote ceph container. This will push your
     local commit on the remote server (g:ceph_remote_server) into the repo
     that is linked with your local workspace. If your current vim directory is
-    set to the checkout directory (i.e. g:ceph_local_workdir + g:ceph_checkout_dir) 
+    set to the checkout directory (i.e. g:ceph_local_workdir + g:ceph_checkout_dir)
     then you will be able to load compilation errors locally. This command will
     also synchronise the local ./build directory with the remote, and modify the
     compile_commands.json file copied from the remote server for semantic completion
@@ -101,6 +101,11 @@ The plugin adds the following vim commands:
     Clean the remote build directory. This command will reset the head on the
     remote build container, effectively doing a deepclean.
 
+    :CephUpdateCompileCommands
+    Update the local compile_commands.json file for semantic completion. This command
+    runs as part of the build process but can also be manually invoked. Install YCM
+    plugin for full semantic completion support.
+
 
 Note: In order to load the remote compilation errors correctly, make sure that
 after having initialized the local repository, you do a vim 'cd' into the
@@ -109,7 +114,7 @@ checked out directory in order to get the mapping for the remote errors.
 ------------------------------------------------------------------------------
 SYNTAX                                                   *ceph-syntax*
 
-The plugin adds syntax highlighting for some ceph specific keywords e.g. 
+The plugin adds syntax highlighting for some ceph specific keywords e.g.
 
 >
 
@@ -133,6 +138,7 @@ nnoremap <leader>cir :CephInitRemote<CR>
 nnoremap <leader>cb  :CephBuild<CR>
 nnoremap <leader>cr  :CephVstart<CR>
 nnoremap <leader>cc  :CephCleanRemote<CR>
+nnoremap <leader>cu  :CephUpdateCompileCommands<CR>
 
 <
 
@@ -155,3 +161,5 @@ submit your patch:
 CHANGELOG                                                *ceph-changelog*
 
 - (v: 1.0) Initial version
+- (v: 1.1) Update build and rsync parameters
+- (v: 1.2) Add CephUpdateCompileCommands

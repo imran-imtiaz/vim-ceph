@@ -15,4 +15,4 @@ See help (:help vim-ceph) for more details.
 * Workspace initialisation 
 * One-click commit and build
 * Enhanced syntax highlighting for Ceph 
-* Semantic completion (coming soon...)
+* Semantic completion

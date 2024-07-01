@@ -87,7 +87,7 @@ augroup ceph
                 \ syn match cephTrace /\v<pl_trace_\w+>/ |
                 \ syn match cephPlfb /\v<plfb_\w+>/ |
                 \ syn match cephPlid /\v<plid_\w+>/ |
-                \ syn match cephEm /\v<Em_\w+>/ |
+                \ syn match cephEm /\v<Ceph\w+>/ |
                 \ syn match cephAssert /\v<(ss_panic|ss_assert)\w*>/ |
                 \ syn match cephList /\v<s{2,3}d?list_\w+>/ |
                 \ syn match cephPlmu /\v<plmu_\w+>/ |
@@ -97,9 +97,10 @@ augroup ceph
                 \ syn keyword Boolean FALSE TRUE
 augroup end
 
-command! -nargs=0 CephInit          call ceph#init()
-command! -nargs=0 CephInitLocal     call ceph#init_local()
-command! -nargs=0 CephInitRemote    call ceph#init_remote()
-command! -nargs=0 CephBuild         call ceph#build()
-command! -nargs=0 CephVstart        call ceph#vstart()
-command! -nargs=0 CephCleanRemote   call ceph#clean_remote()
+command! -nargs=0 CephInit                  call ceph#init()
+command! -nargs=0 CephInitLocal             call ceph#init_local()
+command! -nargs=0 CephInitRemote            call ceph#init_remote()
+command! -nargs=0 CephBuild                 call ceph#build()
+command! -nargs=0 CephVstart                call ceph#vstart()
+command! -nargs=0 CephCleanRemote           call ceph#clean_remote()
+command! -nargs=0 CephUpdateCompileCommands call ceph#update_compile_commands()
