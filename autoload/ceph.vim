@@ -2,7 +2,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 let s:commit_hash = 0
 let s:compile_commands = g:ceph_local_workspace . '/build/compile_commands.json'
-let s:compile_commands_link = g:ceph_local_workspace . '/compile_commands.json'
+let s:compile_commands_orig = s:compile_commands . '.orig'
 
 function! ceph#run_local(cmd, ...) abort
     let use_dispatch = a:0 > 0 ? a:1 : 0
@@ -264,11 +264,13 @@ function! ceph#get_rsync_command()
                 \ "--include '*.json' " .
                 \ "--exclude '*' "
     return 'rsync -v --copy-links -aK -e "ssh -T" ' . filter_pattern .
-                \ g:ceph_remote_server . ':' . g:ceph_remote_workspace . '/build ' . g:ceph_local_workspace
+                \ g:ceph_remote_server . ':' . g:ceph_remote_workspace . '/build ' . g:ceph_local_workspace . ' && ' .
+                \ $"mv -f {s:compile_commands} {s:compile_commands_orig}" . ' && ' .
+                \ $"ln -sf {s:compile_commands}.updated {s:compile_commands}"
 endfunction
 
 function! ceph#update_compile_commands()
-    if filereadable(s:compile_commands)
+    if filereadable(s:compile_commands_orig)
         call ceph#run_local(ceph#get_compile_commands_awk_command())
     endif
 endfunction
@@ -306,8 +308,8 @@ awk '
 ' %s
     END
     let pipeline =<< trim eval END
-    {s:compile_commands} > {s:compile_commands}.updated;
-    ln -s {s:compile_commands}.updated {s:compile_commands_link} 2>&1 >/dev/null;
+    {s:compile_commands_orig} > {s:compile_commands}.updated;
+    ln -sf {s:compile_commands}.updated {s:compile_commands}
     END
 
     return printf(join(awk_cmd, "\n"), join(awk_begin, "\n"), join(pipeline))
