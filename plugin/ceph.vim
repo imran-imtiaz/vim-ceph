@@ -58,7 +58,8 @@ function! s:setup_keymaps() abort
                 \ ['initlocal',  ['il']],
                 \ ['initremote', ['ir']],
                 \ ['install',       'r'],
-                \ ['vstart',        'v'],
+                \ ['vstart',        't'],
+                \ ['stop',          'p'],
     ]
     for [map, key] in keymaps
         call s:init_var('map_' . map, key)
@@ -102,5 +103,6 @@ command! -nargs=0 CephInitLocal             call ceph#init_local()
 command! -nargs=0 CephInitRemote            call ceph#init_remote()
 command! -nargs=0 CephBuild                 call ceph#build()
 command! -nargs=0 CephVstart                call ceph#vstart()
+command! -nargs=0 CephStop                  call ceph#stop()
 command! -nargs=0 CephCleanRemote           call ceph#clean_remote()
 command! -nargs=0 CephUpdateCompileCommands call ceph#update_compile_commands()

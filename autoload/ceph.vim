@@ -182,6 +182,14 @@ function! ceph#vstart() abort
     endif
 endfunction
 
+function! ceph#stop() abort
+    echo "Run stop.sh in containter? (y/n): "
+    let confirm = nr2char(getchar())
+    if confirm ==? 'y'
+        call ceph#dispatch_remote(ceph#get_stop_command())
+    endif
+endfunction
+
 function! ceph#get_init_command(target)
     let cmd =  ''
     if a:target ==# "local" || a:target ==# "full"
@@ -245,8 +253,13 @@ endfunction
 function! ceph#get_vstart_command()
     return 'cd ' . g:ceph_remote_workspace . '/build' . ' && ' .
                 \ 'MDS=0 MON=1 OSD=1 MGR=1 ../src/vstart.sh ' .
-                \ '--bluestore-devs /dev/sdc --new -x ' .
-                \'--localhost -o timeout=10000 -o session_timeout=10000''
+                \ '--debug --new -x --localhost ' . 
+                \ '-o timeout=10000 -o session_timeout=10000'
+endfunction
+
+function! ceph#get_stop_command()
+    return 'cd ' . g:ceph_remote_workspace . '/build' . ' && ' .
+                \ '../src/stop.sh'
 endfunction
 
 function! ceph#get_remote_git_init_command()

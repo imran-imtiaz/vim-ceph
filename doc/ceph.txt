@@ -97,6 +97,9 @@ The plugin adds the following vim commands:
     :CephVstart
     This will run the vstart.sh script with default options inside the ceph container.
 
+    :CephStop
+    This will run the stop.sh script with default options inside the ceph container.
+
     :CephCleanRemote
     Clean the remote build directory. This command will reset the head on the
     remote build container, effectively doing a deepclean.
@@ -137,6 +140,7 @@ nnoremap <leader>cil :CephInitLocal<CR>
 nnoremap <leader>cir :CephInitRemote<CR>
 nnoremap <leader>cb  :CephBuild<CR>
 nnoremap <leader>cr  :CephVstart<CR>
+nnoremap <leader>cp  :CephStopCR>
 nnoremap <leader>cc  :CephCleanRemote<CR>
 nnoremap <leader>cu  :CephUpdateCompileCommands<CR>
 
@@ -163,3 +167,4 @@ CHANGELOG                                                *ceph-changelog*
 - (v: 1.0) Initial version
 - (v: 1.1) Update build and rsync parameters
 - (v: 1.2) Add CephUpdateCompileCommands
+- (v: 1.3) Add CephStop command
